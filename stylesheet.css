@@ -27,34 +27,49 @@ h1 {
 .display {
     border: 2px solid black;
     width: 260px;
-    height: 25px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: right;
     background-color: #3346b0;
+    font-size: xx-large;
+}
+
+.buttonWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
 }
 
 .buttons {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     column-gap: 15px;
-    row-gap: 20px;
-    padding-top: 35px;
+    row-gap: 35px;
 }
 
-.buttons > * {
+.operations {
+    display: grid;
+    grid-template-columns: 1fr;
+    column-gap: 15px;
+    row-gap: 15px;
+    padding-top: 5px;
+}
+
+.buttons > *, .operations > * {
     height: 50px;
     width: 50px;
-    background-color: #2879c4;
-    border: 2px solid black;
-    border-radius: 4px;
+    background-color: transparent;
+    border: none;
+    border-radius: 25px;
     cursor: pointer;
     outline: none;
     transition: .2s all;
     font-size: x-large;
 }
 
-.buttons > *:active {
+.buttons > *:active, .operations > *:active {
     transform: scale(.95);
     box-shadow: 3px 2px 22px 1px rgba(0, 0, 0, 0.24);
 }
