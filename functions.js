@@ -1,12 +1,12 @@
 //Global answer variable for resetting calculator after calculation
-let answer = -1;
+let answer = 'NaN';
 
 //Global symbol variable for input validation from user
 let prevSymbol = '@'
 
 //Gets access to the calculator's display and defaults it to 0
 const screen = document.getElementById('screenDisplay');
-screen.textContent = "0";
+screen.textContent = '';
 
 //Gets the button box div and then populates it with buttons
 const btnBox = document.querySelector('.buttons');
@@ -98,7 +98,7 @@ for (let i = 1; i <= 5; ++i)
         button.textContent = '⌫';
         button.addEventListener('click', addToDisplay);
         button.addEventListener('long-press', function(e) {
-            screen.textContent = '0';
+            screen.textContent = '';
         });
         opBox.appendChild(button);
     }
@@ -152,16 +152,16 @@ function addToDisplay(e)
     if (e.target.id == 'backButton')
     {
         //Makes a single character turn into 0
-        if (screen.textContent.length == 1 && screen.textContent != '0')
+        if (screen.textContent.length == 1)
         {
-            screen.textContent = '0';
+            screen.textContent = '';
         }
 
-        //If the last operation was the answer, replace the answer with 0
+        //If the last operation was the answer, clear display
         else if (screen.textContent == answer)
         {
             prevSymbol = '@';
-            screen.textContent = '0';
+            screen.textContent = '';
         }
 
         //Removes a character from the display completely if there is
@@ -172,43 +172,76 @@ function addToDisplay(e)
         }
     }
 
-    //If the last operation was the answer, replace the answer with the
-    //newly pressed key
+    //Identifies if the display contains an answer from a problem.
     else if (screen.textContent == answer)
     {
-        prevSymbol = '@';
-        screen.textContent = e.target.textContent;
+        //If a symbol is pressed, it will not erase the answer
+        if (e.target.textContent == '+' || 
+        e.target.textContent == '-' || 
+        e.target.textContent == '×' || 
+        e.target.textContent == '÷' ||
+        (e.target.textContent == '.' && !answer.includes('.')))
+        {
+            prevSymbol = e.target.textContent;
+            screen.textContent = screen.textContent + e.target.textContent;
+            return;
+        }
+
+        //Erases the answer if another number is pressed
+        else
+        {
+            prevSymbol = '@';
+            answer = 'NaN';
+            screen.textContent = e.target.textContent;
+            return;
+        }
     }
 
     //Removes zero and starts with whatever button was pressed if 0 is
     //only character in the display
-    else if (screen.textContent == '0')
+    else if (screen.textContent == '')
     {
-        if (e.target.textContent == '+' || 
-        e.target.textContent == '-' || 
+        //If a symbol is pressed, there is no reason for it to erase the 0
+        if (e.target.textContent == '+' ||
+        e.target.textContent == '=' || 
         e.target.textContent == '×' || 
         e.target.textContent == '÷')
         {
-            prevSymbol = e.target.textContent;
-            screen.innerHTML = screen.textContent + e.target.textContent;
             return;
         }
 
         else 
         {
-            screen.innerHTML = e.target.textContent;
+            screen.textContent = e.target.textContent;
             return;
         }
     }
 
+    //Doesn't allow user to input three '-' in a row
+    else if (e.target.textContent == '-' && prevSymbol == screen.textContent[screen.textContent.length
+         - 1] && prevSymbol == screen.textContent[screen.textContent.length - 2])
+    {
+        return;
+    }
+
+    //Doesn't allow user to put two symbols in a row (unless it is a '-')
+    else if (e.target.textContent == prevSymbol && prevSymbol == screen.textContent[screen.textContent.length - 1] && prevSymbol != '-')
+    {
+        return;
+    }
+
+    //Identifies if the last non numeric button pressed was '.'
     else if (e.target.textContent == '.')
     {
+        //If '.' was the last symbol or button pressed, it will not allow
+        //the user to put another
         if (screen.textContent[screen.textContent.length - 1] == '.'
         || prevSymbol == '.')
         {
             return;
         }
 
+        //Otherwise, updates the previous symbol and adds to display
         else
         {
             prevSymbol = e.target.textContent;
@@ -216,6 +249,7 @@ function addToDisplay(e)
         }
     }
 
+    //Identifies if the button pressed was '='
     else if (e.target.textContent == '=')
     {
         //Returns if the last character is an operator. Visually,
@@ -233,13 +267,16 @@ function addToDisplay(e)
         let currentChar;
         let currentSymbol = '@';
     
+        //Loops through the display and performs mathematical operations
+        //in order from left to right.
         for (let i = 0; i < screen.textContent.length; ++i)
         {
             currentChar = screen.textContent[i];
 
-            //If the value is a number and a symbol has not been found yet,
-            //adds that number to numberOne to keep track of it
-            if (currentChar >= '0' && currentChar <= '9' && currentSymbol == '@')
+            //If currentChar is a number or '-' as the first character in
+            //the display, adds that character to numberOne
+            if (currentChar >= '0' && currentChar <= '9' && currentSymbol == '@'
+            || i == 0 && currentChar == '-')
             {
                 numberOne += String(currentChar);
             }
@@ -256,6 +293,13 @@ function addToDisplay(e)
                 numberTwo += String(currentChar);
             }
 
+            //Allows user to user a subtraction sign immediately after another symbol
+            //in order to account for negative numbers in numberTwo
+            else if (currentChar == '-' && currentSymbol == screen.textContent[i - 1])
+            {
+                numberTwo += String(currentChar);
+            }
+
             //If it is a number and a symbol has already been found,
             //add that number to numberTwo to keep track of it
             else if (currentChar >= '0' && currentChar <= '9' && currentSymbol != '@')
@@ -264,6 +308,8 @@ function addToDisplay(e)
                 if (i == (screen.textContent.length - 1))
                 {
                     numberTwo += String(currentChar);
+
+                    console.log(numberOne)
 
                     //If user tries to divide by zero, print ERROR to display
                     if (numberTwo == '0' && currentSymbol == '÷')
@@ -312,7 +358,7 @@ function addToDisplay(e)
     //Adds whatever button was pressed to the display
     else
     {
-        //Keeps track of what the last pressed symbol was
+        //Keeps track of what the last symbol was
         if (e.target.textContent == '+' || 
         e.target.textContent == '-' || 
         e.target.textContent == '×' || 
@@ -321,7 +367,7 @@ function addToDisplay(e)
             prevSymbol = e.target.textContent;
         }
 
-        screen.innerHTML = screen.textContent + e.target.textContent;
+        screen.textContent = screen.textContent + e.target.textContent;
     }
 }
 
@@ -353,27 +399,63 @@ function operate(num1, operater, num2)
 //Simple addition function
 function add(num1, num2)
 {
-    answer = parseFloat(parseFloat(num1) + parseFloat(num2)).toFixed(3);
-    return answer;
+    answer = parseFloat(parseFloat(num1) + parseFloat(num2));
+
+    if (answer.toString().length > 10 && answer >= 10000)
+    {
+        return Number.parseFloat(answer).toExponential(6);
+    }
+
+    else
+    {
+        return answer;
+    }
 }
 
 //Simple subtraction function
 function subtract(num1, num2)
 {
-    answer = parseFloat(parseFloat(num1) - parseFloat(num2)).toFixed(3);
-    return answer;
+    answer = parseFloat(parseFloat(num1) - parseFloat(num2));
+
+    if (answer.toString().length > 10 && answer >= 10000)
+    {
+        return Number.parseFloat(answer).toExponential(6);
+    }
+
+    else
+    {
+        return answer;
+    }
 }
 
 //Simple division function
 function divide(num1, num2)
 {
-    answer = parseFloat(parseFloat(num1) / parseFloat(num2)).toFixed(3);
-    return answer;
+    answer = parseFloat(parseFloat(num1) / parseFloat(num2));
+    
+    if (answer.toString().length > 10 && answer >= 10000)
+    {
+        return Number.parseFloat(answer).toExponential(6);
+    }
+
+    else
+    {
+        return Math.round(answer * 1000) / 1000;
+    }
 }
 
 //Simple multiplication function
 function multiply(num1, num2)
 {
-    answer = parseFloat(num1) * parseFloat(num2);
-    return answer;
+    answer = parseFloat(parseFloat(num1) * parseFloat(num2));
+    
+    if (answer.toString().length > 10 && answer >= 10000)
+    {
+        return Number.parseFloat(answer).toExponential(6);
+    }
+
+    else
+    {
+        return answer;
+    }
 }
