@@ -8,6 +8,7 @@ h1 {
     margin-left: auto;
     margin-right: auto;
     color: #213391;
+    font-family: monospace;
 }
 
 .wrapper {
@@ -26,13 +27,15 @@ h1 {
 
 .display {
     border: 2px solid black;
-    width: 260px;
+    width: 265px;
     height: 40px;
     display: flex;
     align-items: center;
     justify-content: right;
     background-color: #3346b0;
     font-size: xx-large;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .buttonWrapper {
