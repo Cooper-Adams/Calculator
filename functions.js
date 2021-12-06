@@ -11,14 +11,111 @@ screen.textContent = '';
 //Gets the button box div and then populates it with buttons
 const btnBox = document.querySelector('.buttons');
 
+//The window will listen for key presses, and will call the addtodisplay
+//function with the data for the corresponding keys. Allows keyboard
+//support for the calculator, so the user can choose not to manually click
+//the onscreen buttons.
+window.addEventListener('keydown', function (e) 
+{
+    //preventDefault is here to "disable" the quick find feature in Firefox.
+    //Basically just ignores the call to it, allowing the user to divide
+    //freely.
+    e.preventDefault();
+
+    //Prevents null errors for if shift is pressed
+    if (e.key == 'Shift')
+    {
+        return;
+    }
+
+    //Specifies Enter as it is different than the data key for the
+    //physical button onscreen.
+    else if (e.key == 'Enter')
+    {
+        const key = document.querySelector(`button[data-key="="]`);
+        key.classList.toggle('button-active');
+        addToDisplay('equalButton', '=');
+    }
+
+    //Specifies the other pressable buttons from the calculator. This is
+    //done so as prevent null key errors if the user is pressing non-numeric
+    //or non-operational keys on their keyboard.
+    else if (e.key >= 0 && e.key <= 9
+        || e.key == '.'
+        || e.key == '-'
+        || e.key == '+'
+        || e.key == '*'
+        || e.key == '/'
+        || e.key == 'Backspace')
+    {
+        const key = document.querySelector(`button[data-key="${e.key}"]`);
+        key.classList.toggle('button-active');
+        addToDisplay(key.id, key.textContent);
+    }
+
+    //Does nothing if the key pressed is not numeric or operational.
+    else
+    {
+        return;
+    }
+});
+
+//The window will listen for the release of keys in order to remove the
+//button-active class from the keys that are pressed. This is so the buttons
+//still give the effect of being pressed even if the user is using the keyboard.
+window.addEventListener('keyup', function (e) 
+{
+    //preventDefault is here to "disable" the quick find feature in Firefox.
+    //Basically just ignores the call to it, allowing the user to divide
+    //freely.
+    e.preventDefault();
+
+    //Ignores shift press in console due to null key errors.
+    if (e.key == 'Shift')
+    {
+        return;
+    }
+
+    //Specifies the enter key as it's data key is different from the
+    //onscreen button's.
+    else if (e.key == 'Enter')
+    {
+        const key = document.querySelector(`button[data-key="="]`);
+        key.classList.toggle('button-active');
+    }
+
+    //Specifies the other pressable buttons from the calculator. This is
+    //done so as prevent null key errors if the user is pressing non-numeric
+    //or non-operational keys on their keyboard.
+    else if (e.key >= 0 && e.key <= 9
+        || e.key == '.'
+        || e.key == '-'
+        || e.key == '+'
+        || e.key == '*'
+        || e.key == '/'
+        || e.key == 'Backspace')
+    {
+        const key = document.querySelector(`button[data-key="${e.key}"]`);
+        key.classList.toggle('button-active');
+    }
+
+    //Does nothing if the key pressed is not numeric or operational.
+    else
+    {
+        return;
+    }
+});
+
 //Instantiates the buttons 7, 8, 9, that go on the top row of the number
 //side of the calculator
 for (let i = 7; i <= 9; ++i)
 {
     const button = document.createElement('button');
     button.setAttribute('id', 'num' + i);
+    button.setAttribute('data-key', i);
+    button.classList.add('key');
     button.textContent = i;
-    button.addEventListener('click', addToDisplay);
+    button.addEventListener('click', function() {addToDisplay(button.id, button.textContent, false)});
     btnBox.appendChild(button);
 }
 
@@ -28,8 +125,10 @@ for (let i = 4; i <= 6; ++i)
 {
     const button = document.createElement('button');
     button.setAttribute('id', 'num' + i);
+    button.setAttribute('data-key', i);
+    button.classList.add('key');
     button.textContent = i;
-    button.addEventListener('click', addToDisplay);
+    button.addEventListener('click', function() {addToDisplay(button.id, button.textContent, false)});
     btnBox.appendChild(button);
 }
 
@@ -39,8 +138,10 @@ for (let i = 1; i <= 3; ++i)
 {
     const button = document.createElement('button');
     button.setAttribute('id', 'num' + i);
+    button.setAttribute('data-key', i);
+    button.classList.add('key');
     button.textContent = i;
-    button.addEventListener('click', addToDisplay);
+    button.addEventListener('click', function() {addToDisplay(button.id, button.textContent, false)});
     btnBox.appendChild(button);
 }
 
@@ -53,8 +154,10 @@ for (let i = 10; i <= 12; ++i)
     {
         const button = document.createElement('button');
         button.setAttribute('id', 'zeroButton');
+        button.setAttribute('data-key', 0);
+        button.classList.add('key');
         button.textContent = '0';
-        button.addEventListener('click', addToDisplay);
+        button.addEventListener('click', function() {addToDisplay(button.id, button.textContent, false)});
         btnBox.appendChild(button);
     }
 
@@ -63,8 +166,10 @@ for (let i = 10; i <= 12; ++i)
     {
         const button = document.createElement('button');
         button.setAttribute('id', 'deciButton');
+        button.setAttribute('data-key', '.');
+        button.classList.add('key');
         button.textContent = '.';
-        button.addEventListener('click', addToDisplay);
+        button.addEventListener('click', function() {addToDisplay(button.id, button.textContent, false)});
         btnBox.appendChild(button);
     }
 
@@ -73,8 +178,10 @@ for (let i = 10; i <= 12; ++i)
     {
         const button = document.createElement('button');
         button.setAttribute('id', 'equalButton');
+        button.setAttribute('data-key', '=');
+        button.classList.add('key');
         button.textContent = '=';
-        button.addEventListener('click', addToDisplay);
+        button.addEventListener('click', function() {addToDisplay(button.id, button.textContent, false)});
         btnBox.appendChild(button);
     }
 }
@@ -94,9 +201,11 @@ for (let i = 1; i <= 5; ++i)
         //John Doherty. The js file is included in the directory.
         const button = document.createElement('button');
         button.setAttribute('id', 'backButton');
+        button.setAttribute('data-key', 'Backspace');
+        button.classList.add('key');
         button.setAttribute('data-long-press-delay', '500')
         button.textContent = '⌫';
-        button.addEventListener('click', addToDisplay);
+        button.addEventListener('click', function() {addToDisplay(button.id, button.textContent, false)});
         button.addEventListener('long-press', function(e) {
             screen.textContent = '';
         });
@@ -108,8 +217,10 @@ for (let i = 1; i <= 5; ++i)
     {
         const button = document.createElement('button');
         button.setAttribute('id', 'diviButton');
+        button.setAttribute('data-key', '/');
+        button.classList.add('key');
         button.textContent = '÷';
-        button.addEventListener('click', addToDisplay);
+        button.addEventListener('click', function() {addToDisplay(button.id, button.textContent, false)});
         opBox.appendChild(button);
     }
 
@@ -118,8 +229,10 @@ for (let i = 1; i <= 5; ++i)
     {
         const button = document.createElement('button');
         button.setAttribute('id', 'multButton');
+        button.setAttribute('data-key', '*');
+        button.classList.add('key');
         button.textContent = '×';
-        button.addEventListener('click', addToDisplay);
+        button.addEventListener('click', function() {addToDisplay(button.id, button.textContent, false)});
         opBox.appendChild(button);
     }
 
@@ -128,8 +241,10 @@ for (let i = 1; i <= 5; ++i)
     {
         const button = document.createElement('button');
         button.setAttribute('id', 'subtButton');
+        button.setAttribute('data-key', '-');
+        button.classList.add('key');
         button.textContent = '-';
-        button.addEventListener('click', addToDisplay);
+        button.addEventListener('click', function() {addToDisplay(button.id, button.textContent, false)});
         opBox.appendChild(button);
     }
 
@@ -138,18 +253,20 @@ for (let i = 1; i <= 5; ++i)
     {
         const button = document.createElement('button');
         button.setAttribute('id', 'addButton');
+        button.setAttribute('data-key', '+');
+        button.classList.add('key');
         button.textContent = '+';
-        button.addEventListener('click', addToDisplay);
+        button.addEventListener('click', function() {addToDisplay(button.id, button.textContent, false)});
         opBox.appendChild(button);
     }
 }
 
 //Function for on button click, adds the value of the clicked button
 //to the display.
-function addToDisplay(e)
+function addToDisplay(id, value)
 {
     //Identifies if the button pressed was the back button
-    if (e.target.id == 'backButton')
+    if (id == 'backButton')
     {
         //Makes a single character turn into 0
         if (screen.textContent.length == 1)
@@ -176,14 +293,20 @@ function addToDisplay(e)
     else if (screen.textContent == answer)
     {
         //If a symbol is pressed, it will not erase the answer
-        if (e.target.textContent == '+' || 
-        e.target.textContent == '-' || 
-        e.target.textContent == '×' || 
-        e.target.textContent == '÷' ||
-        (e.target.textContent == '.' && !answer.includes('.')))
+        if (value == '+' || 
+        value == '-' || 
+        value == '×' || 
+        value == '÷' ||
+        (value == '.' && !answer.includes('.')))
         {
-            prevSymbol = e.target.textContent;
-            screen.textContent = screen.textContent + e.target.textContent;
+            prevSymbol = value;
+            screen.textContent = screen.textContent + value;
+            return;
+        }
+
+        //If user presses '=' after an answer is displayed, do nothing
+        else if (value == '=')
+        {
             return;
         }
 
@@ -192,7 +315,7 @@ function addToDisplay(e)
         {
             prevSymbol = '@';
             answer = 'NaN';
-            screen.textContent = e.target.textContent;
+            screen.textContent = value;
             return;
         }
     }
@@ -202,36 +325,57 @@ function addToDisplay(e)
     else if (screen.textContent == '')
     {
         //If a symbol is pressed, there is no reason for it to erase the 0
-        if (e.target.textContent == '+' ||
-        e.target.textContent == '=' || 
-        e.target.textContent == '×' || 
-        e.target.textContent == '÷')
+        if (value == '+' ||
+        value == '=' || 
+        value == '×' || 
+        value == '÷')
         {
             return;
         }
 
         else 
         {
-            screen.textContent = e.target.textContent;
+            screen.textContent = value;
             return;
         }
     }
 
     //Doesn't allow user to input three '-' in a row
-    else if (e.target.textContent == '-' && prevSymbol == screen.textContent[screen.textContent.length
+    else if (value == '-' && prevSymbol == screen.textContent[screen.textContent.length
          - 1] && prevSymbol == screen.textContent[screen.textContent.length - 2])
     {
         return;
     }
 
     //Doesn't allow user to put two symbols in a row (unless it is a '-')
-    else if (e.target.textContent == prevSymbol && prevSymbol == screen.textContent[screen.textContent.length - 1] && prevSymbol != '-')
+    else if (value == prevSymbol && prevSymbol == screen.textContent[screen.textContent.length - 1] && prevSymbol != '-')
     {
         return;
     }
 
+    //Identifies if the previous key press was '.' for verification logic.
+    else if (screen.textContent[screen.textContent.length - 1] == '.')
+    {
+        //Does not allow user to perform operation if there is no value on
+        //the right of the decimal
+        if (value == '+' 
+        || value == '÷' 
+        || value == '×' 
+        || value == '-' 
+        || value == '=')
+        {
+            return;
+        }
+
+        //Otherwise appends to display
+        else
+        {
+            screen.textContent = screen.textContent + value;
+        }
+    }
+
     //Identifies if the last non numeric button pressed was '.'
-    else if (e.target.textContent == '.')
+    else if (value == '.')
     {
         //If '.' was the last symbol or button pressed, it will not allow
         //the user to put another
@@ -244,13 +388,13 @@ function addToDisplay(e)
         //Otherwise, updates the previous symbol and adds to display
         else
         {
-            prevSymbol = e.target.textContent;
-            screen.textContent = screen.textContent + e.target.textContent;
+            prevSymbol = value;
+            screen.textContent = screen.textContent + value;
         }
     }
 
     //Identifies if the button pressed was '='
-    else if (e.target.textContent == '=')
+    else if (value == '=')
     {
         //Returns if the last character is an operator. Visually,
         //It will appear as if nothing has happened.
@@ -309,8 +453,6 @@ function addToDisplay(e)
                 {
                     numberTwo += String(currentChar);
 
-                    console.log(numberOne)
-
                     //If user tries to divide by zero, print ERROR to display
                     if (numberTwo == '0' && currentSymbol == '÷')
                     {
@@ -359,15 +501,15 @@ function addToDisplay(e)
     else
     {
         //Keeps track of what the last symbol was
-        if (e.target.textContent == '+' || 
-        e.target.textContent == '-' || 
-        e.target.textContent == '×' || 
-        e.target.textContent == '÷')
+        if (value == '+' || 
+        value == '-' || 
+        value == '×' || 
+        value == '÷')
         {
-            prevSymbol = e.target.textContent;
+            prevSymbol = value;
         }
 
-        screen.textContent = screen.textContent + e.target.textContent;
+        screen.textContent = screen.textContent + value;
     }
 }
 
